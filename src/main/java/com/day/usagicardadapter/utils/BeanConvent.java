@@ -1,5 +1,6 @@
 package com.day.usagicardadapter.utils;
 
+import com.day.usagicardadapter.model.DifficultyType;
 import com.day.usagicardadapter.model.divingfish.FishRecord;
 import com.day.usagicardadapter.model.divingfish.SongBasicInfo;
 import com.day.usagicardadapter.model.divingfish.SongInfo;
@@ -9,6 +10,7 @@ import com.day.usagicardadapter.model.uc.ScoreInfo;
 import com.day.usagicardadapter.model.uc.UCSongInfo;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class BeanConvent {
@@ -16,18 +18,21 @@ public class BeanConvent {
     private static final String TYPE_DX = "DX";
     private static final String TYPE_STD = "SD";
 
-    public static SongInfo toSongInfo(UCSongInfo ucSongInfo){
+    public static SongInfo toSongInfo(UCSongInfo ucSongInfo, DifficultyType type){
         SongInfo songInfo = new SongInfo();
         SongBasicInfo basicInfo = new SongBasicInfo();
         basicInfo.setArtist(ucSongInfo.getArtist());
         basicInfo.setTitle(ucSongInfo.getTitle());
         basicInfo.setBpm(ucSongInfo.getBpm());
         basicInfo.setGenre(ucSongInfo.getGenre());
+        songInfo.setBasic_info(basicInfo);
         songInfo.setId(ucSongInfo.getId()==null?null:String.valueOf(ucSongInfo.getId()));
         songInfo.setTitle(ucSongInfo.getTitle());
-        songInfo.setType(ucSongInfo.getDifficulties().getDx().isEmpty()?TYPE_STD:TYPE_DX);
-        songInfo.setDs(ucSongInfo.getDifficulties().getLevelVales());//TODO 有歧义
-        songInfo.setLevel(ucSongInfo.getDifficulties().getLevelStr())
+        songInfo.setType(type.equals(DifficultyType.STANDARD)?TYPE_STD:TYPE_DX);
+        songInfo.setDs(ucSongInfo.getDifficulties().getLevelVales(type));//TODO 有歧义
+        songInfo.setLevel(ucSongInfo.getDifficulties().getLevelStr(type));
+        //TODO MORE
+        return songInfo;
     }
 
     /**
@@ -38,15 +43,18 @@ public class BeanConvent {
         UserRecordInfo info = new UserRecordInfo();
         if(b50){
             List<FishRecord> fishRecords = new ArrayList<>(50);
-            fishRecords.addAll(score.getB35_scores().stream().map(BeanConvent::toRecord).toList());
-            fishRecords.addAll(score.getB15_scores().stream().map(BeanConvent::toRecord).toList());
+            fishRecords.addAll(score.getAllScores().stream().map(BeanConvent::toRecord).toList());
             info.setFishRecords(fishRecords);
             info.setRating(score.getAll_rating());
-            return info;
         }else {
-            //TODO b40
-            return info;
+            List<ScoreInfo> scores = new ArrayList<>(score.getAllScores());
+            scores.sort(Comparator.comparing(ScoreInfo::getDx_rating));
+            scores.reversed();
+            List<ScoreInfo> b40 = scores.subList(0, 40);
+            info.setRating(b40.stream().map(ScoreInfo::getDx_rating).reduce(0,Integer::sum));
+            info.setFishRecords(b40.stream().map(BeanConvent::toRecord).toList());
         }
+        return info;
     }
     public static FishRecord toRecord(ScoreInfo score){
         FishRecord record = new FishRecord();

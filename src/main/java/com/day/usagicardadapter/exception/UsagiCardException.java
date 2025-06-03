@@ -7,4 +7,8 @@ public class UsagiCardException extends RuntimeException {
     public UsagiCardException(String message) {
         super(message);
     }
+    public UsagiCardException(String message,Throwable cause) {
+        super(message,cause);
+    }
+
 }

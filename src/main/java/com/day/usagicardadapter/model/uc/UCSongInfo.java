@@ -21,4 +21,5 @@ public class UCSongInfo {
     private List<String> aliases;
     private Boolean disabled;
     private SongDifficulties difficulties;
+    private List<ScoreInfo> scores;
 }

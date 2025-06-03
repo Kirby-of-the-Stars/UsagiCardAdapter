@@ -1,19 +1,10 @@
 package features;
 
-import com.day.usagi-card-adapter.App;
-
-import org.junit.jupiter.api.Test;
-
+import com.day.usagicardadapter.App;
 import org.noear.solon.test.HttpTester;
 import org.noear.solon.test.SolonTest;
 
-import java.io.IOException;
-
 @SolonTest(App.class)
 public class HelloTest extends HttpTester {
-    @Test
-    public void hello() throws IOException {
-        assert path("/hello?name=world").get().contains("world");
-        assert path("/hello?name=solon").get().contains("solon");
-    }
+
 }

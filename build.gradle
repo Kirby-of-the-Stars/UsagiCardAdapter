@@ -13,16 +13,17 @@ group = "com.day"
 version = "1.0"
 description = "UsagiCard data Adapter"
 
-
 dependencies {
+    compileOnly("org.projectlombok:lombok:1.18.38")
+    annotationProcessor("org.projectlombok:lombok:1.18.38")
     implementation platform("org.noear:solon-parent:3.3.1")
-    
     implementation("org.noear:solon-web")
     implementation("org.noear:solon-view-freemarker")
     implementation("org.noear:solon-logging-logback")
     implementation("org.noear:solon-net-httputils")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    compileOnly("org.projectlombok:lombok")
+    implementation("org.noear:solon-logging-logback")
+
     testImplementation("org.noear:solon-test")
 }
 
@@ -38,7 +39,6 @@ jar {
     }
     
     dependsOn(configurations.runtimeClasspath)
-
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from(configurations.runtimeClasspath.collect {
         if (it.isDirectory()) it else zipTree(it)
