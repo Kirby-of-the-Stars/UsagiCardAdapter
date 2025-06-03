@@ -1,0 +1,16 @@
+server.port: 8080
+
+solon.app:
+  name: 'UsagiCardAdapter'
+  group: 'UsagiCard'
+solon:
+  threads:
+    virtual:
+      enabled: true
+
+solon.logging:
+  appender:
+    console:
+      level: INFO
+    file:
+      level: INFO
