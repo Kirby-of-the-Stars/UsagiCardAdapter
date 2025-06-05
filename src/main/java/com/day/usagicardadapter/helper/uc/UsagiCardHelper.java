@@ -5,6 +5,7 @@ import com.day.usagicardadapter.model.DifficultyType;
 import com.day.usagicardadapter.model.divingfish.SongInfo;
 import com.day.usagicardadapter.model.divingfish.UserRecordInfo;
 import com.day.usagicardadapter.model.uc.BestScore;
+import com.day.usagicardadapter.model.uc.PlateInfo;
 import com.day.usagicardadapter.model.uc.ScoreInfo;
 import com.day.usagicardadapter.model.uc.UCSongInfo;
 import com.day.usagicardadapter.utils.BeanConvent;
@@ -82,4 +83,18 @@ public class UsagiCardHelper {
         }
     }
 
+    public List<PlateInfo> queryUserPlateInfo(String UUID,String qq,String version){
+        boolean useUUID = !StringUtil.isEmpty(UUID);
+        try {
+            String identity = useUUID ? UUID : qq;
+            String body = HttpUtils.http(API_HOST + "/plates")
+                    .data(useUUID ? "uuid" : "qq", identity)
+                    .data("plate",version + "将")
+                    .get();
+            if (body == null || body.isEmpty()) throw new UsagiCardException("empty result");
+            return ONode.loadStr(body).toObjectList(PlateInfo.class);
+        } catch (HttpException e) {
+            throw new UsagiCardException("request exception", e);
+        }
+    }
 }

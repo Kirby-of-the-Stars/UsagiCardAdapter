@@ -6,6 +6,9 @@ import com.day.usagicardadapter.model.divingfish.SongBasicInfo;
 import com.day.usagicardadapter.model.divingfish.SongInfo;
 import com.day.usagicardadapter.model.divingfish.UserRecordInfo;
 import com.day.usagicardadapter.model.uc.BestScore;
+import com.day.usagicardadapter.model.uc.PlateInfo;
+import com.day.usagicardadapter.model.uc.PlateScoreInfo;
+import com.day.usagicardadapter.model.uc.PlateSongInfo;
 import com.day.usagicardadapter.model.uc.ScoreInfo;
 import com.day.usagicardadapter.model.uc.UCSongInfo;
 
@@ -44,7 +47,7 @@ public class BeanConvent {
         if(b50){
             List<FishRecord> fishRecords = new ArrayList<>(50);
             fishRecords.addAll(score.getAllScores().stream().map(BeanConvent::toRecord).toList());
-            info.setFishRecords(fishRecords);
+            info.setRecords(fishRecords);
             info.setRating(score.getAll_rating());
         }else {
             List<ScoreInfo> scores = new ArrayList<>(score.getAllScores());
@@ -52,7 +55,7 @@ public class BeanConvent {
             scores.reversed();
             List<ScoreInfo> b40 = scores.subList(0, 40);
             info.setRating(b40.stream().map(ScoreInfo::getDx_rating).reduce(0,Integer::sum));
-            info.setFishRecords(b40.stream().map(BeanConvent::toRecord).toList());
+            info.setRecords(b40.stream().map(BeanConvent::toRecord).toList());
         }
         return info;
     }
@@ -70,7 +73,28 @@ public class BeanConvent {
         record.setRate(StrUtil.conventIntRate(score.getRate()));
         record.setSong_id(score.getSong_id());
         record.setTitle(score.getSong_name());
-        record.setType(score.getType());
+        record.setType(StrUtil.conventDXType(score.getType()));
         return record;
+    }
+    /*
+        TODO 缺少：定数 rating dx分
+     */
+    public static List<FishRecord> toRecord(PlateInfo plateInfo){
+        List<PlateScoreInfo> scores = plateInfo.getScores();
+        List<FishRecord> fishRecords = new ArrayList<>(scores.size());
+        for(PlateScoreInfo score:scores){
+            FishRecord Record = new FishRecord();
+            Record.setAchievements(score.getAchievement());
+            Record.setSong_id(score.getId());
+            Record.setRate(StrUtil.conventIntRate(score.getRate()));
+            Record.setFc(StrUtil.conventIntFc(score.getFc()));
+            Record.setFs(StrUtil.conventIntFs(score.getFs()));
+            Record.setLevel_index(score.getLevel_index());
+            Record.setLevel_label(StrUtil.conventLevelStr(score.getLevel_index()));
+            Record.setType(StrUtil.conventDXType(score.getType()));
+            Record.setTitle(plateInfo.getSong().getTitle());
+            fishRecords.add(Record);
+        }
+        return fishRecords;
     }
 }

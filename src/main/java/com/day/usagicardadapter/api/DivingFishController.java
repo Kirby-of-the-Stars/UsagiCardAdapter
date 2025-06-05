@@ -9,6 +9,7 @@ import com.day.usagicardadapter.model.divingfish.UserRecordInfo;
 import com.day.usagicardadapter.model.uc.ScoreInfo;
 import com.day.usagicardadapter.model.uc.UCSongInfo;
 import com.day.usagicardadapter.utils.BeanConvent;
+import com.day.usagicardadapter.utils.StrUtil;
 import org.noear.snack.core.utils.StringUtil;
 import org.noear.solon.annotation.Controller;
 import org.noear.solon.annotation.Get;
@@ -18,6 +19,7 @@ import org.noear.solon.annotation.Param;
 import org.noear.solon.annotation.Post;
 import org.noear.solon.core.handle.Context;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -56,7 +58,7 @@ public class DivingFishController {
     public Result<UserRecordInfo> queryUserAllRecords(Context ctx, String uuid, String qq) {
         UserRecordInfo info = new UserRecordInfo();
         List<ScoreInfo> scores = ucHelper.queryUserAllScores(uuid, qq);
-        info.setFishRecords(scores.stream().map(BeanConvent::toRecord).toList());
+        info.setRecords(scores.stream().map(BeanConvent::toRecord).toList());
         return Result.success(info);
     }
 
@@ -66,18 +68,41 @@ public class DivingFishController {
      * @param uuid    UsagiCard的UUID
      * @param qq      qq号
      * @param musicId 歌曲id
-     * @return {@link UserRecordInfo}
+     * @return {@link FishRecord}
      */
     @CheckDivingFishUser
     @Post
     @Mapping("player/record")
-    public Result<List<FishRecord>> queryUserAllRecords(Context ctx, String uuid, String qq, @Param("music_id") String musicId) {
+    public Result<List<FishRecord>> queryUserSingleRecord(Context ctx, String uuid, String qq, @Param("music_id") String musicId) {
         UCSongInfo scoreInfo = ucHelper.queryUserSingleSongScore(uuid, qq, musicId);
         return Result.success(scoreInfo.getScores().stream().map(BeanConvent::toRecord).toList());
     }
+    /**
+     * 查询用户某版本的成绩情况
+     *
+     * @param uuid    UsagiCard的UUID
+     * @param qq      qq号
+     * @param versions 版本列表
+     * @return {@link UserRecordInfo}
+     */
+    @Post
+    @Mapping("query/plate")
+    public Result<UserRecordInfo> queryUserPlate(String uuid, String qq,List<String> versions) {
+        UserRecordInfo info = new UserRecordInfo();
+        List<FishRecord> records = new ArrayList<>();
+        for(String version : versions) {
+            String v = StrUtil.conventVersion(version);
+            if(StringUtil.isEmpty(v)) continue;
+            //future: 也许改成并发操作
+            ucHelper.queryUserPlateInfo(uuid, qq, v)
+                    .forEach(plateInfo -> records.addAll(BeanConvent.toRecord(plateInfo)));
+        }
+        info.setRecords(records);
+        return Result.success(info);
+    }
 
     /**
-     * 获取全部乐曲数据(TODO)
+     * 获取全部乐曲数据(待定)
      */
     @Get
     @Mapping("/music_data")

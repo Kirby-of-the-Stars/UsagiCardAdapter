@@ -12,5 +12,5 @@ public class UserRecordInfo {
     private String nickname;
     private String plate;
     private Integer rating;
-    private List<FishRecord> fishRecords;
+    private List<FishRecord> records;
 }
