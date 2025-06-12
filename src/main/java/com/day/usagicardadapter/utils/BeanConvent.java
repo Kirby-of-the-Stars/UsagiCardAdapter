@@ -8,7 +8,6 @@ import com.day.usagicardadapter.model.divingfish.UserRecordInfo;
 import com.day.usagicardadapter.model.uc.BestScore;
 import com.day.usagicardadapter.model.uc.PlateInfo;
 import com.day.usagicardadapter.model.uc.PlateScoreInfo;
-import com.day.usagicardadapter.model.uc.PlateSongInfo;
 import com.day.usagicardadapter.model.uc.ScoreInfo;
 import com.day.usagicardadapter.model.uc.UCSongInfo;
 
@@ -32,7 +31,7 @@ public class BeanConvent {
         songInfo.setId(ucSongInfo.getId()==null?null:String.valueOf(ucSongInfo.getId()));
         songInfo.setTitle(ucSongInfo.getTitle());
         songInfo.setType(type.equals(DifficultyType.STANDARD)?TYPE_STD:TYPE_DX);
-        songInfo.setDs(ucSongInfo.getDifficulties().getLevelVales(type));//TODO 有歧义
+        songInfo.setDs(ucSongInfo.getDifficulties().getLevelVales(type));
         songInfo.setLevel(ucSongInfo.getDifficulties().getLevelStr(type));
         //TODO MORE
         return songInfo;
