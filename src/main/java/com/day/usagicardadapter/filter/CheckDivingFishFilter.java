@@ -13,18 +13,22 @@ public class CheckDivingFishFilter implements Filter {
     public void doFilter(Context ctx, FilterChain chain) throws Throwable {
         //检验账号，但现在先经过uc验证
         String contentType = ctx.contentType();
-        if(contentType.equals("application/json") || contentType.equals("text/json")) {
+        if (contentType != null && (contentType.equals("application/json") || contentType.equals("text/json"))) {
             ONode node = ONode.loadStr(ctx.body());
-            if(node.contains("qq") || node.contains("uuid")) {
+            if (node.contains("qq") || node.contains("username")) {
                 //TODO check valid
                 chain.doFilter(ctx);
-            }else {
-                ctx.status(403);
-                ctx.render(Result.fail("user not found"));
+                return;
             }
-        }else {
-            ctx.status(406);
+        } else {
+            //检查Query参数
+            if (ctx.param("username") != null || ctx.param("qq") != null) {
+                //TODO check valid
+                chain.doFilter(ctx);
+                return;
+            }
         }
-
+        ctx.status(403);
+        ctx.render(Result.fail("user not found"));
     }
 }

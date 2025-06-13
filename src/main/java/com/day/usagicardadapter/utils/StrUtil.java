@@ -77,7 +77,7 @@ public class StrUtil {
     }
     public static String conventDXType(String type){
       return switch (type){
-            case "stander" -> "SD";
+            case "standard" -> "SD";
             case "dx" ->"DX";
             case null, default -> "";
         };
