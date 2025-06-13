@@ -7,7 +7,7 @@ import com.day.usagicardadapter.model.divingfish.FishRecord;
 import com.day.usagicardadapter.model.divingfish.SongInfo;
 import com.day.usagicardadapter.model.divingfish.UserRecordInfo;
 import com.day.usagicardadapter.model.uc.ScoreInfo;
-import com.day.usagicardadapter.model.uc.UCSongInfo;
+import com.day.usagicardadapter.model.uc.UsagiCardSong;
 import com.day.usagicardadapter.utils.BeanConvent;
 import com.day.usagicardadapter.utils.StrUtil;
 import org.noear.snack.core.utils.StringUtil;
@@ -73,8 +73,8 @@ public class DivingFishController {
     @Post
     @Mapping("player/record")
     public Result<List<FishRecord>> queryUserSingleRecord(String username,String qq,@Param("music_id") String musicId) {
-        UCSongInfo scoreInfo = ucHelper.queryUserSingleSongScore(username, qq, musicId);
-        return Result.success(scoreInfo.getScores().stream().map(BeanConvent::toRecord).toList());
+        UsagiCardSong song = ucHelper.queryUserSingleSongScore(username, qq, musicId);
+        return Result.success(song.getScores().stream().map(BeanConvent::toRecord).toList());
     }
     /**
      * 查询用户某版本的成绩情况
