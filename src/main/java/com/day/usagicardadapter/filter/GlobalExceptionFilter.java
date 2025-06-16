@@ -22,7 +22,7 @@ public class GlobalExceptionFilter implements Filter {
             ctx.status(e.getCode()); //可能的状态码为：4xxx
         } catch (Throwable e) {
             ctx.status(500);
-            ctx.render(Result.fail("Server ERROR"+e.getLocalizedMessage()));
+            ctx.render(Result.fail("Server ERROR "+e.getLocalizedMessage()));
             log.error(e.getLocalizedMessage(), e);
         }
     }

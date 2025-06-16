@@ -15,51 +15,46 @@ public class SongDifficulties {
 
     private List<DifficultyInfo> utage;
 
-    public List<Float> getLevelVales(DifficultyType type){
+    public List<Float> getLevelVales(DifficultyType type) {
         List<Float> result = new ArrayList<>();
-        switch (type){
+        switch (type) {
             case STANDARD:
-                standard.forEach(diff->result.add(diff.getLevel_value()));break;
+                standard.forEach(diff -> result.add(diff.getLevel_value()));
+                break;
             case DX:
-                dx.forEach(diff->result.add(diff.getLevel_value()));break;
+                dx.forEach(diff -> result.add(diff.getLevel_value()));
+                break;
             case UTAG:
-                utage.forEach(diff->result.add(diff.getLevel_value()));break;
+                utage.forEach(diff -> result.add(diff.getLevel_value()));
+                break;
         }
         return result;
     }
 
-    /**
-     * 获取定数列表(小数点)
-     * 按SD DX UTAGE的顺序获取
-     */
-    public List<Float> getLevelVales(){
-        List<Float> result = new ArrayList<>();
-        if(standard!=null && !standard.isEmpty()){
-            standard.forEach(difficulty-> result.add(difficulty.getLevel_value()));
-            return result;
-        }
-        if(dx != null && !dx.isEmpty()){
-            dx.forEach(difficulty-> result.add(difficulty.getLevel_value()));
-            return result;
-        }
-        if(utage != null && !utage.isEmpty()){
-            utage.forEach(difficulty-> result.add(difficulty.getLevel_value()));
-        }
-        return result;
+    public List<DifficultyInfo> getDiffs(DifficultyType type) {
+        return switch (type) {
+            case STANDARD -> standard;
+            case DX -> dx;
+            case UTAG -> utage;
+            case null, default -> null;
+        };
     }
 
     /**
      * 获取显式等级列表(即不带小数点)
      */
-    public List<String> getLevelStr(DifficultyType type){
+    public List<String> getLevelStr(DifficultyType type) {
         List<String> result = new ArrayList<>();
-        switch (type){
+        switch (type) {
             case STANDARD:
-                standard.forEach(diff->result.add(diff.getLevel()));break;
+                standard.forEach(diff -> result.add(diff.getLevel()));
+                break;
             case DX:
-                dx.forEach(diff->result.add(diff.getLevel()));break;
+                dx.forEach(diff -> result.add(diff.getLevel()));
+                break;
             case UTAG:
-                utage.forEach(difficulty-> result.add(difficulty.getLevel()));break;
+                utage.forEach(difficulty -> result.add(difficulty.getLevel()));
+                break;
         }
         return result;
     }

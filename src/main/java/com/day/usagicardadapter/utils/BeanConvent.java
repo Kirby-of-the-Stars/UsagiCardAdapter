@@ -3,9 +3,11 @@ package com.day.usagicardadapter.utils;
 import com.day.usagicardadapter.model.DifficultyType;
 import com.day.usagicardadapter.model.divingfish.FishRecord;
 import com.day.usagicardadapter.model.divingfish.SongBasicInfo;
+import com.day.usagicardadapter.model.divingfish.SongChart;
 import com.day.usagicardadapter.model.divingfish.SongInfo;
 import com.day.usagicardadapter.model.divingfish.UserRecordInfo;
 import com.day.usagicardadapter.model.uc.BestScore;
+import com.day.usagicardadapter.model.uc.DifficultyInfo;
 import com.day.usagicardadapter.model.uc.PlateInfo;
 import com.day.usagicardadapter.model.uc.PlateScoreInfo;
 import com.day.usagicardadapter.model.uc.ScoreInfo;
@@ -17,48 +19,81 @@ import java.util.List;
 
 public class BeanConvent {
 
-    private static final String TYPE_DX = "DX";
-    private static final String TYPE_STD = "SD";
+    //TODO lxn style id → divingfish id
 
-    public static SongInfo toSongInfo(UCSongInfo ucSongInfo, DifficultyType type){
-        SongInfo songInfo = new SongInfo();
+    public static List<SongInfo> toSongInfo(UCSongInfo ucSongInfo) {
+        List<SongInfo> result = new ArrayList<>(3);
+        //TODO missing is_new release_data
         SongBasicInfo basicInfo = new SongBasicInfo();
         basicInfo.setArtist(ucSongInfo.getArtist());
         basicInfo.setTitle(ucSongInfo.getTitle());
         basicInfo.setBpm(ucSongInfo.getBpm());
         basicInfo.setGenre(ucSongInfo.getGenre());
+        if (ucSongInfo.isHas(DifficultyType.STANDARD)) {
+            result.add(toSongInfo(ucSongInfo, basicInfo, DifficultyType.STANDARD));
+        }
+        if (ucSongInfo.isHas(DifficultyType.DX)) {
+            result.add(toSongInfo(ucSongInfo, basicInfo, DifficultyType.DX));
+        }
+        if (ucSongInfo.isHas(DifficultyType.UTAG)) {
+            result.add(toSongInfo(ucSongInfo, basicInfo, DifficultyType.UTAG));
+        }
+        //TODO need check
+        return result;
+    }
+
+    //TODO cid is not convertible?
+    private static SongInfo toSongInfo(UCSongInfo ucSongInfo, SongBasicInfo basicInfo, DifficultyType type) {
+        SongInfo songInfo = new SongInfo();
         songInfo.setBasic_info(basicInfo);
-        songInfo.setId(ucSongInfo.getId()==null?null:String.valueOf(ucSongInfo.getId()));
+        //notice id is different
+        songInfo.setId(ucSongInfo.getId() == null ? null : String.valueOf(ucSongInfo.getId()));
         songInfo.setTitle(ucSongInfo.getTitle());
-        songInfo.setType(type.equals(DifficultyType.STANDARD)?TYPE_STD:TYPE_DX);
+        songInfo.setType(StrUtil.conventDXType(type));
         songInfo.setDs(ucSongInfo.getDifficulties().getLevelVales(type));
         songInfo.setLevel(ucSongInfo.getDifficulties().getLevelStr(type));
-        //TODO MORE
+        songInfo.setCids(new ArrayList<>());
+        List<SongChart> charts = new ArrayList<>();
+        for (DifficultyInfo dif : ucSongInfo.getDifficulties().getDiffs(type)) {
+            SongChart chart = new SongChart();
+            chart.setCharter(dif.getNote_designer());
+            chart.setNotes(StrUtil.toList(
+                    dif.getTap_num(),
+                    dif.getHold_num(),
+                    dif.getSlide_num(),
+                    dif.getTouch_num(),
+                    dif.getBreak_num()
+            ));
+            charts.add(chart);
+        }
+        songInfo.setCharts(charts);
         return songInfo;
     }
 
     /**
      * 用户简略成绩信息(会缺失用户信息)
+     *
      * @param b50 是否为b50，否则为b40
      */
-    public static UserRecordInfo toRecordInfo(BestScore score, boolean b50){
+    public static UserRecordInfo toRecordInfo(BestScore score, boolean b50) {
         UserRecordInfo info = new UserRecordInfo();
-        if(b50){
+        if (b50) {
             List<FishRecord> fishRecords = new ArrayList<>(50);
             fishRecords.addAll(score.getAllScores().stream().map(BeanConvent::toRecord).toList());
             info.setRecords(fishRecords);
             info.setRating(score.getAll_rating());
-        }else {
+        } else {
             List<ScoreInfo> scores = new ArrayList<>(score.getAllScores());
             scores.sort(Comparator.comparing(ScoreInfo::getDx_rating));
             scores.reversed();
             List<ScoreInfo> b40 = scores.subList(0, 40);
-            info.setRating(b40.stream().map(ScoreInfo::getDx_rating).reduce(0,Integer::sum));
+            info.setRating(b40.stream().map(ScoreInfo::getDx_rating).reduce(0, Integer::sum));
             info.setRecords(b40.stream().map(BeanConvent::toRecord).toList());
         }
         return info;
     }
-    public static FishRecord toRecord(ScoreInfo score){
+
+    public static FishRecord toRecord(ScoreInfo score) {
         FishRecord record = new FishRecord();
         record.setAchievements(score.getAchievements());
         record.setDs(score.getLevel_value());
@@ -75,13 +110,14 @@ public class BeanConvent {
         record.setType(StrUtil.conventDXType(score.getType()));
         return record;
     }
+
     /*
         TODO 缺少：定数 rating dx分
      */
-    public static List<FishRecord> toRecord(PlateInfo plateInfo){
+    public static List<FishRecord> toRecord(PlateInfo plateInfo) {
         List<PlateScoreInfo> scores = plateInfo.getScores();
         List<FishRecord> fishRecords = new ArrayList<>(scores.size());
-        for(PlateScoreInfo score:scores){
+        for (PlateScoreInfo score : scores) {
             FishRecord Record = new FishRecord();
             Record.setAchievements(score.getAchievement());
             Record.setSong_id(score.getId());

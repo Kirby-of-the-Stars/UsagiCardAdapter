@@ -1,15 +1,13 @@
 package com.day.usagicardadapter.helper.uc;
 
 import com.day.usagicardadapter.exception.UsagiCardException;
-import com.day.usagicardadapter.model.DifficultyType;
 import com.day.usagicardadapter.model.divingfish.SongInfo;
-import com.day.usagicardadapter.model.divingfish.UserRecordInfo;
 import com.day.usagicardadapter.model.uc.BestScore;
 import com.day.usagicardadapter.model.uc.PlateInfo;
 import com.day.usagicardadapter.model.uc.ScoreInfo;
+import com.day.usagicardadapter.model.uc.SongData;
 import com.day.usagicardadapter.model.uc.UCSongInfo;
 import com.day.usagicardadapter.model.uc.UsagiCardSong;
-import com.day.usagicardadapter.utils.BeanConvent;
 import org.noear.snack.ONode;
 import org.noear.snack.core.utils.StringUtil;
 import org.noear.solon.annotation.Component;
@@ -23,6 +21,7 @@ public class UsagiCardHelper {
     //TODO 接口缺少用户信息
     private static final String API_HOST = "https://uc.turou.fun/api/maimai/v1";
     //About api doc : https://uc.turou.fun/api/docs#/
+    private static final String API_MAIMAIPY_HOST = "http://localhost:8000";
 
     public List<ScoreInfo> queryUserAllScores(String UUID,String qq){
         boolean useUUID = !StringUtil.isEmpty(UUID);
@@ -55,7 +54,7 @@ public class UsagiCardHelper {
         }
     }
 
-    public BestScore queryUserSimpleRecords(boolean b50, String UUID, String qq) {
+    public BestScore queryUserSimpleRecords(String UUID, String qq) {
         boolean useUUID = !StringUtil.isEmpty(UUID);
         try {
             String identity = useUUID ? UUID : qq;
@@ -82,6 +81,20 @@ public class UsagiCardHelper {
             if (body == null || body.isEmpty()) throw new UsagiCardException("empty result");
             List<PlateInfo> list = ONode.loadStr(body).toObjectList(PlateInfo.class);
             if(list==null) throw new UsagiCardException("unexpected result:"+body);
+            return list;
+        } catch (HttpException e) {
+            throw new UsagiCardException("request exception", e);
+        }
+    }
+
+    public List<UCSongInfo> queryMusicData(){
+        try {
+            String body = HttpUtils.http(API_MAIMAIPY_HOST + "/songs")
+                    .data("page_size","1000")//TODO change 10000 after maimai.py update
+                    .get();
+            if (body == null || body.isEmpty()) throw new UsagiCardException("empty result");
+            List<UCSongInfo> list = ONode.loadStr(body).toObjectList(UCSongInfo.class);
+            if(list==null || list.isEmpty()) throw new UsagiCardException("unexpected result:"+body);
             return list;
         } catch (HttpException e) {
             throw new UsagiCardException("request exception", e);

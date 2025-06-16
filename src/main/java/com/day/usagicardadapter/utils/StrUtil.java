@@ -1,5 +1,10 @@
 package com.day.usagicardadapter.utils;
 
+import com.day.usagicardadapter.model.DifficultyType;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class StrUtil {
 
     public static String conventIntFc(Integer fc){
@@ -79,7 +84,25 @@ public class StrUtil {
       return switch (type){
             case "standard" -> "SD";
             case "dx" ->"DX";
+            case "utage" -> "UTAGE";
             case null, default -> "";
         };
+    }
+    public static String conventDXType(DifficultyType type){
+        return switch (type){
+            case STANDARD -> "SD";
+            case DX ->"DX";
+            case UTAG -> "UTAGE";
+            case null -> "";
+        };
+    }
+
+    public static List<String> toList(Integer... nums){
+        List<String> list = new ArrayList<>(nums.length);
+        for(Integer i:nums){
+            if(i==null) list.add("0");
+            else list.add(String.valueOf(i));
+        }
+        return list;
     }
 }
