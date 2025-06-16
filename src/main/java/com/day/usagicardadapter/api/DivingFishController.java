@@ -3,10 +3,10 @@ package com.day.usagicardadapter.api;
 import com.day.usagicardadapter.annotation.CheckDivingFishUser;
 import com.day.usagicardadapter.cache.MusicDataCache;
 import com.day.usagicardadapter.helper.uc.UsagiCardHelper;
-import com.day.usagicardadapter.model.Result;
 import com.day.usagicardadapter.model.divingfish.FishRecord;
 import com.day.usagicardadapter.model.divingfish.SongInfo;
 import com.day.usagicardadapter.model.divingfish.UserRecordInfo;
+import com.day.usagicardadapter.model.divingfish.response.DivingFishVersionResp;
 import com.day.usagicardadapter.model.uc.ScoreInfo;
 import com.day.usagicardadapter.model.uc.SongData;
 import com.day.usagicardadapter.model.uc.UsagiCardSong;
@@ -21,7 +21,9 @@ import org.noear.solon.annotation.Param;
 import org.noear.solon.annotation.Post;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @Mapping("api/fish/mai")
@@ -44,9 +46,9 @@ public class DivingFishController {
     @CheckDivingFishUser
     @Post
     @Mapping("query/player")
-    public Result<UserRecordInfo> queryUserSimpleRecords(String username, String qq, String b50) {
+    public UserRecordInfo queryUserSimpleRecords(String username, String qq, String b50) {
         boolean isB50 = !StringUtil.isEmpty(b50);
-        return Result.success(BeanConvent.toRecordInfo(ucHelper.queryUserSimpleRecords(username, qq), isB50));
+        return BeanConvent.toRecordInfo(ucHelper.queryUserSimpleRecords(username, qq), isB50);
     }
 
     /**
@@ -59,11 +61,11 @@ public class DivingFishController {
     @CheckDivingFishUser
     @Get
     @Mapping("player/records")
-    public Result<UserRecordInfo> queryUserAllRecords(String username, String qq) {
+    public UserRecordInfo queryUserAllRecords(String username, String qq) {
         UserRecordInfo info = new UserRecordInfo();
         List<ScoreInfo> scores = ucHelper.queryUserAllScores(username, qq);
         info.setRecords(scores.stream().map(BeanConvent::toRecord).toList());
-        return Result.success(info);
+        return info;
     }
 
     /**
@@ -77,9 +79,11 @@ public class DivingFishController {
     @CheckDivingFishUser
     @Post
     @Mapping("player/record")
-    public Result<List<FishRecord>> queryUserSingleRecord(String username, String qq, @Param("music_id") String musicId) {
+    public Map<String, List<FishRecord>> queryUserSingleRecord(String username, String qq, @Param("music_id") String musicId) {
         UsagiCardSong song = ucHelper.queryUserSingleSongScore(username, qq, musicId);
-        return Result.success(song.getScores().stream().map(BeanConvent::toRecord).toList());
+        Map<String, List<FishRecord>> map = new HashMap<>();
+        map.put(musicId, song.getScores().stream().map(BeanConvent::toRecord).toList());
+        return map;
     }
 
     /**
@@ -92,18 +96,16 @@ public class DivingFishController {
      */
     @Post
     @Mapping("query/plate")
-    public Result<UserRecordInfo> queryUserPlate(String username, String qq, List<String> versions) {
-        UserRecordInfo info = new UserRecordInfo();
+    public DivingFishVersionResp queryUserPlate(String username, String qq, List<String> versions) {
         List<FishRecord> records = new ArrayList<>();
         for (String version : versions) {
             String v = StrUtil.conventVersion(version);
             if (StringUtil.isEmpty(v)) continue;
-            //future: 也许改成并发操作
+            //TODO future: 也许改成并发操作
             ucHelper.queryUserPlateInfo(username, qq, v)
                     .forEach(plateInfo -> records.addAll(BeanConvent.toRecord(plateInfo)));
         }
-        info.setRecords(records);
-        return Result.success(info);
+        return new DivingFishVersionResp(records);
     }
 
     /**
@@ -112,8 +114,8 @@ public class DivingFishController {
      */
     @Get
     @Mapping("/music_data")
-    public Result<List<SongInfo>> queryAllSongsInfo() {
+    public List<SongInfo> queryAllSongsInfo() {
         SongData musicData = musicDataCache.getMusicData();
-        return Result.success(musicData.getSongs());
+        return musicData.getSongs();
     }
 }
