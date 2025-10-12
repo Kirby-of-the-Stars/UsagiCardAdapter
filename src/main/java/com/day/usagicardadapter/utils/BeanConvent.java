@@ -145,7 +145,7 @@ public class BeanConvent {
         record.setLevel_index(score.getLevel_index());
         record.setRa(score.getDx_rating());
         record.setRate(StrUtil.conventIntRate(score.getRate()));
-        record.setSong_id(toFishStyleId(score.getId()));
+        record.setSong_id(toFishStyleId(score.getId(),score.getType()));
         record.setTitle(score.getTitle());
         record.setType(StrUtil.conventDXType(score.getType()));
         return record;
@@ -164,7 +164,7 @@ public class BeanConvent {
         for (PlateScoreInfo score : scores) {
             FishRecord Record = new FishRecord();
             Record.setAchievements(score.getAchievement());
-            Record.setSong_id(score.getId());
+            Record.setSong_id(toFishStyleId(score.getId(),score.getType()));
             Record.setRate(StrUtil.conventIntRate(score.getRate()));
             Record.setFc(StrUtil.conventIntFc(score.getFc()));
             Record.setFs(StrUtil.conventIntFs(score.getFs()));
@@ -177,25 +177,11 @@ public class BeanConvent {
         return fishRecords;
     }
 
-
-    public static Integer toFishStyleId(Integer lxnsStyleId) {
-        if (lxnsStyleId == null) return null;
-        int id = lxnsStyleId;
-        if (id > 100000) {
-            //宴谱取后四位
-            int sid = id % 10000;
-            //如果是DX还得转换
-            if (sid > 1000) {
-                //DX谱为1xxxx
-                return sid + 10000;
-            }
-            return sid;
-        }
-        if (id > 1000) {
-            //DX谱为1xxxx
-            return id + 10000;
-        }
-        //标谱id一致
-        return id;
+    public static Integer toFishStyleId(Integer lxnsStyleId,String type){
+        return switch (type){
+            case "dx", "DX" -> lxnsStyleId + 10000;
+            case "SD","standard"  -> lxnsStyleId;
+            default -> throw new IllegalStateException("Unexpected value: " + type);
+        };
     }
 }

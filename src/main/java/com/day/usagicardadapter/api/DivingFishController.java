@@ -21,6 +21,7 @@ import com.day.usagicardadapter.utils.VersionUtils;
 import org.noear.snack.ONode;
 import org.noear.snack.core.utils.StringUtil;
 import org.noear.solon.annotation.*;
+import org.noear.solon.core.handle.Context;
 import org.noear.solon.validation.annotation.NotBlank;
 import org.noear.solon.validation.annotation.NotEmpty;
 
@@ -82,9 +83,17 @@ public class DivingFishController {
     @Post
     @Mapping("dev/player/record")
     public Map<String, List<FishRecord>> queryUserSingleRecord(String username, String qq, @Param("music_id") String musicId) {
-        UsagiCardSong song = ucHelper.queryUserSingleSongScore(uuidMappingUtil.get(qq).getUuid(), musicId);
+        int mid = Integer.parseInt(musicId);
+        UsagiCardSong song = ucHelper.queryUserSingleSongScore(uuidMappingUtil.get(qq).getUuid(),musicId);
         Map<String, List<FishRecord>> map = new HashMap<>();
-        map.put(musicId, song.getScores().stream().map(BeanConvent::toRecord).toList());
+        //区分是不是dx
+        boolean isDx = mid > 10000;
+        List<FishRecord> list = song.getScores().stream().map(BeanConvent::toRecord).toList();
+
+        map.put(musicId,list.stream().filter(r->{
+            if(isDx) return Objects.equals(r.getType(), "DX");
+            else return Objects.equals(r.getType(), "SD");
+        }).peek(r-> r.setSong_id(mid)).toList());
         return map;
     }
     /**
@@ -152,9 +161,15 @@ public class DivingFishController {
      */
     @Get
     @Mapping("query/player/playcount")
-    public BestPlayCountRecordInfo queryUserBestPlayCountRecords(@NotBlank(message = "qq不能为空") String qq) {
+    public BestPlayCountRecordInfo queryUserBestPlayCountRecords(Context ctx, @NotBlank(message = "qq不能为空") String qq) throws Throwable {
         FishUserInfo fishUserInfo = uuidMappingUtil.get(qq);
-        if(fishUserInfo == null) throw new UsagiCardException("user identity not found , can't use this endpoint");
+        if(fishUserInfo == null){
+            ONode node = new ONode();
+            node.setNode("message", ONode.load("only usagi user can use"));
+            ctx.status(400);
+            ctx.render(node);
+            return null;
+        }
         String uuid = fishUserInfo.getUuid();
         //TODO temperately using all scores
         List<ScoreInfo> top50Pc = ucHelper.queryUserAllScores(uuid)
