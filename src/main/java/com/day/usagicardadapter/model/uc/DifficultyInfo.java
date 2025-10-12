@@ -18,6 +18,10 @@ public class DifficultyInfo {
     private Integer touch_num;
     private Integer break_num;
     private DifficultyCurve curve;
-
+    //utage only
+    private String description;
+    private Boolean is_buddy;
+    private String kanji;
+    private Integer diff_id;
 
 }

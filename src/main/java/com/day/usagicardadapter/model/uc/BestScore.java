@@ -7,17 +7,17 @@ import java.util.List;
 
 @Data
 public class BestScore {
-    private List<ScoreInfo> b35_scores;
-    private List<ScoreInfo> b15_scores;
-    private Integer b35_rating;
-    private Integer b15_rating;
-    private Integer all_rating;
+    private List<ScoreInfo> scores_b35;
+    private List<ScoreInfo> scores_b15;
+    private Integer rating_b35;
+    private Integer rating_b15;
+    private Integer rating;
 
 
     public List<ScoreInfo> getAllScores(){
-        List<ScoreInfo> list = new ArrayList<>(b35_scores.size() + b15_scores.size());
-        list.addAll(b35_scores);
-        list.addAll(b15_scores);
+        List<ScoreInfo> list = new ArrayList<>(scores_b35.size() + scores_b15.size());
+        list.addAll(scores_b35);
+        list.addAll(scores_b15);
         return list;
     }
 }

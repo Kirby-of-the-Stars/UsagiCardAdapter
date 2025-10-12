@@ -1,9 +1,8 @@
 package com.day.usagicardadapter.config;
 
-import com.day.usagicardadapter.model.divingfish.FishRecord;
-import com.day.usagicardadapter.model.divingfish.SongBasicInfo;
-import com.day.usagicardadapter.model.divingfish.SongInfo;
-import com.day.usagicardadapter.model.divingfish.UserRecordInfo;
+import com.day.usagicardadapter.model.SetupUserInfoReq;
+import com.day.usagicardadapter.model.divingfish.*;
+import com.day.usagicardadapter.model.divingfish.response.DivingFishVersionResp;
 import com.day.usagicardadapter.model.uc.BestScore;
 import com.day.usagicardadapter.model.uc.DifficultyCurve;
 import com.day.usagicardadapter.model.uc.DifficultyInfo;
@@ -12,6 +11,7 @@ import com.day.usagicardadapter.model.uc.PlateScoreInfo;
 import com.day.usagicardadapter.model.uc.PlateSongInfo;
 import com.day.usagicardadapter.model.uc.SampleSize;
 import com.day.usagicardadapter.model.uc.ScoreInfo;
+import com.day.usagicardadapter.model.uc.SongData;
 import com.day.usagicardadapter.model.uc.SongDifficulties;
 import com.day.usagicardadapter.model.uc.UCSongInfo;
 import com.day.usagicardadapter.model.uc.UsagiCardSong;
@@ -33,6 +33,8 @@ public class RuntimeNativeRegistrarImpl implements RuntimeNativeRegistrar {
         metadata.registerReflection(SongBasicInfo.class, MemberCategory.INVOKE_DECLARED_METHODS,MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,MemberCategory.DECLARED_FIELDS);
         metadata.registerReflection(SongInfo.class, MemberCategory.INVOKE_DECLARED_METHODS,MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,MemberCategory.DECLARED_FIELDS);
         metadata.registerReflection(UserRecordInfo.class, MemberCategory.INVOKE_DECLARED_METHODS,MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,MemberCategory.DECLARED_FIELDS);
+        metadata.registerReflection(UserBestRecordInfo.class, MemberCategory.INVOKE_DECLARED_METHODS,MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,MemberCategory.DECLARED_FIELDS);
+        metadata.registerReflection(DivingFishVersionResp.class, MemberCategory.INVOKE_DECLARED_METHODS,MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,MemberCategory.DECLARED_FIELDS);
         //usagi card
         metadata.registerReflection(BestScore.class, MemberCategory.INVOKE_DECLARED_METHODS,MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,MemberCategory.DECLARED_FIELDS);
         metadata.registerReflection(UCSongInfo.class, MemberCategory.INVOKE_DECLARED_METHODS,MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,MemberCategory.DECLARED_FIELDS);
@@ -45,6 +47,8 @@ public class RuntimeNativeRegistrarImpl implements RuntimeNativeRegistrar {
         metadata.registerReflection(DifficultyInfo.class, MemberCategory.INVOKE_DECLARED_METHODS,MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,MemberCategory.DECLARED_FIELDS);
         metadata.registerReflection(DifficultyCurve.class, MemberCategory.INVOKE_DECLARED_METHODS,MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,MemberCategory.DECLARED_FIELDS);
         metadata.registerReflection(SampleSize.class, MemberCategory.INVOKE_DECLARED_METHODS,MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,MemberCategory.DECLARED_FIELDS);
-
+        metadata.registerReflection(SongData.class, MemberCategory.INVOKE_DECLARED_METHODS,MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,MemberCategory.DECLARED_FIELDS);
+        //other
+        metadata.registerReflection(SetupUserInfoReq.class, MemberCategory.INVOKE_DECLARED_METHODS,MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,MemberCategory.DECLARED_FIELDS);
     }
 }

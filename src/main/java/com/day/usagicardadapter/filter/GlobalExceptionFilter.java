@@ -1,6 +1,7 @@
 package com.day.usagicardadapter.filter;
 
 import com.day.usagicardadapter.model.Result;
+import org.noear.snack.ONode;
 import org.noear.solon.annotation.Component;
 import org.noear.solon.core.exception.StatusException;
 import org.noear.solon.core.handle.Context;
@@ -17,6 +18,8 @@ public class GlobalExceptionFilter implements Filter {
     @Override
     public void doFilter(Context ctx, FilterChain chain) throws Throwable {
         try {
+            log.info("request body: {}", ONode.stringify(ctx.body()));
+            log.info("request param: {}", ONode.stringify(ctx.paramMap()));
             chain.doFilter(ctx);
         } catch (StatusException e) {
             ctx.status(e.getCode()); //可能的状态码为：4xxx

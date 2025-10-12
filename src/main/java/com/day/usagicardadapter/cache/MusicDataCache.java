@@ -14,12 +14,12 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@Component
+
+@Deprecated
 public class MusicDataCache extends TimeCache<SongData> {
 
     static Logger log = LoggerFactory.getLogger(MusicDataCache.class);
 
-    @Inject
     UsagiCardHelper ucHelper;
 
     public MusicDataCache() {

@@ -1,11 +1,7 @@
 package com.day.usagicardadapter.utils;
 
 import com.day.usagicardadapter.model.DifficultyType;
-import com.day.usagicardadapter.model.divingfish.FishRecord;
-import com.day.usagicardadapter.model.divingfish.SongBasicInfo;
-import com.day.usagicardadapter.model.divingfish.SongChart;
-import com.day.usagicardadapter.model.divingfish.SongInfo;
-import com.day.usagicardadapter.model.divingfish.UserRecordInfo;
+import com.day.usagicardadapter.model.divingfish.*;
 import com.day.usagicardadapter.model.uc.BestScore;
 import com.day.usagicardadapter.model.uc.DifficultyInfo;
 import com.day.usagicardadapter.model.uc.PlateInfo;
@@ -20,15 +16,18 @@ import java.util.List;
 public class BeanConvent {
 
     //TODO lxn style id → divingfish id
+    //TODO 特判Link同名歌
+
+    private static final int CURRENT_VERSION = 25000;
 
     public static List<SongInfo> toSongInfo(UCSongInfo ucSongInfo) {
         List<SongInfo> result = new ArrayList<>(3);
-        //TODO missing is_new release_data
         SongBasicInfo basicInfo = new SongBasicInfo();
         basicInfo.setArtist(ucSongInfo.getArtist());
         basicInfo.setTitle(ucSongInfo.getTitle());
         basicInfo.setBpm(ucSongInfo.getBpm());
         basicInfo.setGenre(ucSongInfo.getGenre());
+        basicInfo.setIs_new(isNew(ucSongInfo.getVersion()));
         if (ucSongInfo.isHas(DifficultyType.STANDARD)) {
             result.add(toSongInfo(ucSongInfo, basicInfo, DifficultyType.STANDARD));
         }
@@ -42,7 +41,7 @@ public class BeanConvent {
         return result;
     }
 
-    //TODO cid is not convertible?
+
     private static SongInfo toSongInfo(UCSongInfo ucSongInfo, SongBasicInfo basicInfo, DifficultyType type) {
         SongInfo songInfo = new SongInfo();
         songInfo.setBasic_info(basicInfo);
@@ -70,26 +69,52 @@ public class BeanConvent {
         return songInfo;
     }
 
+    private static boolean isNew(Integer version){
+        return version != null && version >= CURRENT_VERSION;
+    }
+
     /**
-     * 用户简略成绩信息(会缺失用户信息)
+     * 用户简略成绩信息 (b50)
      *
      * @param b50 是否为b50，否则为b40
      */
-    public static UserRecordInfo toRecordInfo(BestScore score, boolean b50) {
-        UserRecordInfo info = new UserRecordInfo();
+    public static UserBestRecordInfo toBestRecordInfo(BestScore score, boolean b50, FishUserInfo fishUserInfo) {
+        UserBestRecordInfo info = new UserBestRecordInfo();
+        info.setNickname(fishUserInfo.getNickname());
+        info.setPlate(fishUserInfo.getPlate());
+        info.setUser_general_data(fishUserInfo.getUser_general_data());
+        info.setUsername(fishUserInfo.getUsername());
+        info.setAdditional_rating(fishUserInfo.getAdditional_rating());
         if (b50) {
-            List<FishRecord> fishRecords = new ArrayList<>(50);
-            fishRecords.addAll(score.getAllScores().stream().map(BeanConvent::toRecord).toList());
-            info.setRecords(fishRecords);
-            info.setRating(score.getAll_rating());
+            info.setCharts(new BestFishRecord(
+                    score.getScores_b15().stream().map(BeanConvent::toRecord).toList()
+                    ,score.getScores_b35().stream().map(BeanConvent::toRecord).toList()
+            ));
+            info.setRating(score.getRating());
         } else {
-            List<ScoreInfo> scores = new ArrayList<>(score.getAllScores());
-            scores.sort(Comparator.comparing(ScoreInfo::getDx_rating));
-            scores.reversed();
-            List<ScoreInfo> b40 = scores.subList(0, 40);
-            info.setRating(b40.stream().map(ScoreInfo::getDx_rating).reduce(0, Integer::sum));
-            info.setRecords(b40.stream().map(BeanConvent::toRecord).toList());
+            List<FishRecord> b40 = new ArrayList<>(40);
+            List<FishRecord> b15 = score.getScores_b15().stream().map(BeanConvent::toRecord).toList();
+            List<FishRecord> b25 = score.getScores_b35().subList(0,25).stream().map(BeanConvent::toRecord).toList();
+            info.setCharts(new BestFishRecord(b15,b25));
+            b40.addAll(b15);
+            b40.addAll(b25);
+            info.setRating(b40.stream().map(FishRecord::getRa).reduce(0, Integer::sum));
         }
+        return info;
+    }
+
+    /**
+     * 用户成绩信息
+     */
+    public static UserRecordInfo toRecordsInfo(List<ScoreInfo> scores, FishUserInfo fishUserInfo) {
+        UserRecordInfo info = new UserRecordInfo();
+        info.setNickname(fishUserInfo.getNickname());
+        info.setPlate(fishUserInfo.getPlate());
+        info.setUsername(fishUserInfo.getUsername());
+        info.setAdditional_rating(fishUserInfo.getAdditional_rating());
+        List<FishRecord> fishRecords = scores.stream().map(BeanConvent::toRecord).toList();
+        info.setRating(scores.stream().map(ScoreInfo::getDx_rating).reduce(0, Integer::sum));
+        info.setRecords(fishRecords);
         return info;
     }
 
@@ -105,8 +130,8 @@ public class BeanConvent {
         record.setLevel_index(score.getLevel_index());
         record.setRa(score.getDx_rating());
         record.setRate(StrUtil.conventIntRate(score.getRate()));
-        record.setSong_id(score.getSong_id());
-        record.setTitle(score.getSong_name());
+        record.setSong_id(toFishStyleId(score.getId()));
+        record.setTitle(score.getTitle());
         record.setType(StrUtil.conventDXType(score.getType()));
         return record;
     }
@@ -131,5 +156,27 @@ public class BeanConvent {
             fishRecords.add(Record);
         }
         return fishRecords;
+    }
+
+
+    public static Integer toFishStyleId(Integer lxnsStyleId) {
+        if (lxnsStyleId == null) return null;
+        int id = lxnsStyleId;
+        if (id > 100000) {
+            //宴谱取后四位
+            int sid = id % 10000;
+            //如果是DX还得转换
+            if (sid > 1000) {
+                //DX谱为1xxxx
+                return sid + 10000;
+            }
+            return sid;
+        }
+        if (id > 1000) {
+            //DX谱为1xxxx
+            return id + 10000;
+        }
+        //标谱id一致
+        return id;
     }
 }

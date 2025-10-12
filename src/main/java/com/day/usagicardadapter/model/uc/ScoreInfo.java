@@ -8,8 +8,8 @@ import java.math.BigDecimal;
 @Data
 @Accessors(chain = true)
 public class ScoreInfo {
-    private Integer song_id;
-    private String song_name;
+    private Integer id;
+    private String title;
     private String level;
     private Integer level_index;
     private Float level_value;
@@ -21,4 +21,5 @@ public class ScoreInfo {
     private Integer dx_rating;
     private Integer rate;
     private String type;
+    private Integer play_count;
 }

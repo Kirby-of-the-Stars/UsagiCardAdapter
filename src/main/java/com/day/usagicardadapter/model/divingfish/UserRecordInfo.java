@@ -10,6 +10,7 @@ import java.util.List;
 public class UserRecordInfo {
     private Integer additional_rating;
     private String nickname;
+    private String username;
     private String plate;
     private Integer rating;
     private List<FishRecord> records;
