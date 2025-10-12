@@ -1,13 +1,9 @@
 package com.day.usagicardadapter.utils;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.day.usagicardadapter.model.DifficultyType;
 import com.day.usagicardadapter.model.divingfish.*;
-import com.day.usagicardadapter.model.uc.BestScore;
-import com.day.usagicardadapter.model.uc.DifficultyInfo;
-import com.day.usagicardadapter.model.uc.PlateInfo;
-import com.day.usagicardadapter.model.uc.PlateScoreInfo;
-import com.day.usagicardadapter.model.uc.ScoreInfo;
-import com.day.usagicardadapter.model.uc.UCSongInfo;
+import com.day.usagicardadapter.model.uc.*;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -104,6 +100,25 @@ public class BeanConvent {
     }
 
     /**
+     * 用户简略成绩信息 (pc50)
+     *
+     */
+    public static BestPlayCountRecordInfo toBestPlayCountInfo(BestScore score, FishUserInfo fishUserInfo) {
+        BestPlayCountRecordInfo info = new BestPlayCountRecordInfo();
+        info.setNickname(fishUserInfo.getNickname());
+        info.setPlate(fishUserInfo.getPlate());
+        info.setUser_general_data(fishUserInfo.getUser_general_data());
+        info.setUsername(fishUserInfo.getUsername());
+        info.setAdditional_rating(fishUserInfo.getAdditional_rating());
+        info.setCharts(new BestPlayCountRecord(
+                score.getScores_b15().stream().map(BeanConvent::toRecordWithPC).toList()
+                ,score.getScores_b35().stream().map(BeanConvent::toRecordWithPC).toList()
+        ));
+        info.setRating(score.getRating());
+        return info;
+    }
+
+    /**
      * 用户成绩信息
      */
     public static UserRecordInfo toRecordsInfo(List<ScoreInfo> scores, FishUserInfo fishUserInfo) {
@@ -135,7 +150,11 @@ public class BeanConvent {
         record.setType(StrUtil.conventDXType(score.getType()));
         return record;
     }
-
+    public static FishRecordWithPC toRecordWithPC(ScoreInfo score) {
+        FishRecordWithPC record = BeanUtil.toBean(toRecord(score), FishRecordWithPC.class);
+        record.setPlay_count(score.getPlay_count());
+        return record;
+    }
     /*
         TODO 缺少：定数 rating dx分
      */

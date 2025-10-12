@@ -10,21 +10,21 @@ import com.day.usagicardadapter.model.divingfish.FishUserInfo;
 import com.day.usagicardadapter.model.divingfish.UserBestRecordInfo;
 import com.day.usagicardadapter.model.divingfish.UserRecordInfo;
 import com.day.usagicardadapter.model.divingfish.response.DivingFishVersionResp;
+import com.day.usagicardadapter.model.uc.BestPlayCountRecordInfo;
+import com.day.usagicardadapter.model.uc.BestScore;
 import com.day.usagicardadapter.model.uc.ScoreInfo;
 import com.day.usagicardadapter.model.uc.UsagiCardSong;
 import com.day.usagicardadapter.utils.BeanConvent;
 import com.day.usagicardadapter.utils.StrUtil;
 import com.day.usagicardadapter.utils.UUIDMappingUtil;
+import com.day.usagicardadapter.utils.VersionUtils;
 import org.noear.snack.ONode;
 import org.noear.snack.core.utils.StringUtil;
 import org.noear.solon.annotation.*;
 import org.noear.solon.validation.annotation.NotBlank;
 import org.noear.solon.validation.annotation.NotEmpty;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @Mapping("fish/maimaidxprober")
@@ -37,6 +37,8 @@ public class DivingFishController {
     UUIDMappingUtil uuidMappingUtil;
     @Inject
     DivingFishHelper divingFishHelper;
+    @Inject
+    VersionUtils versionUtils;
 
     /**
      * 查询用户简略成绩(通常来说指的是b50)
@@ -146,15 +148,25 @@ public class DivingFishController {
     /**
      * 查询用户游玩次数最高的前50
      * @param qq       qq号
-     * @return {@link UserBestRecordInfo}
+     * @return {@link BestPlayCountRecordInfo}
      */
-    @Post
+    @Get
     @Mapping("query/player/playcount")
-    public UserBestRecordInfo queryUserBestPlayCountRecords(@NotBlank(message = "qq不能为空") String qq) {
+    public BestPlayCountRecordInfo queryUserBestPlayCountRecords(@NotBlank(message = "qq不能为空") String qq) {
         FishUserInfo fishUserInfo = uuidMappingUtil.get(qq);
         if(fishUserInfo == null) throw new UsagiCardException("user identity not found , can't use this endpoint");
-        List<ScoreInfo> scores = ucHelper.queryUserAllScores(fishUserInfo.getUuid());
-        scores.
-        return BeanConvent.toBestRecordInfo(null, false,fishUserInfo);
+        String uuid = fishUserInfo.getUuid();
+        //TODO temperately using all scores
+        List<ScoreInfo> top50Pc = ucHelper.queryUserAllScores(uuid)
+                .stream()
+                .sorted(Comparator.comparing(a -> Optional.ofNullable(a.getPlay_count()).orElse(0)))
+                .toList()
+                .reversed()
+                .subList(0, 50);
+        //BestScore Wrapper
+        BestScore bs = new BestScore();
+        bs.setB15(top50Pc.subList(35,50));
+        bs.setB35(top50Pc.subList(0,35));
+        return BeanConvent.toBestPlayCountInfo(bs, fishUserInfo);
     }
 }

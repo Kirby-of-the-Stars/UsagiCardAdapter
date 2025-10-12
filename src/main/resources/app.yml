@@ -1,4 +1,4 @@
-server.port: 8080
+server.port: 8787
 
 solon.app:
   name: 'UsagiCardAdapter'
@@ -7,6 +7,8 @@ solon:
   threads:
     virtual:
       enabled: true
+  serialization.json:
+    nullAsWriteable: true
 
 solon.logging:
   appender:
@@ -14,3 +16,9 @@ solon.logging:
       level: INFO
     file:
       level: INFO
+app:
+  usagi:
+    fish:
+      uuid-mapping-file-path: data/usagi_fish_mapping.json
+    dev-token: ${USAGI_DEV_TOKEN}
+    version-file-path: data/versions.json
