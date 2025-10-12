@@ -165,23 +165,30 @@ public class DivingFishController {
         FishUserInfo fishUserInfo = uuidMappingUtil.get(qq);
         if(fishUserInfo == null){
             ONode node = new ONode();
-            node.setNode("message", ONode.load("only usagi user can use"));
+            node.set("message", "only usagi user can use");
             ctx.status(400);
             ctx.render(node);
             return null;
         }
         String uuid = fishUserInfo.getUuid();
+
         //TODO temperately using all scores
         List<ScoreInfo> top50Pc = ucHelper.queryUserAllScores(uuid)
                 .stream()
                 .sorted(Comparator.comparing(a -> Optional.ofNullable(a.getPlay_count()).orElse(0)))
                 .toList()
-                .reversed()
-                .subList(0, 50);
+                .reversed();
+        int size = top50Pc.size();
+        top50Pc = top50Pc.subList(0, Math.min(size, 50));
         //BestScore Wrapper
         BestScore bs = new BestScore();
-        bs.setB15(top50Pc.subList(35,50));
-        bs.setB35(top50Pc.subList(0,35));
+        bs.setB35(top50Pc.subList(0,Math.min(size, 35)));
+        if(size > 35){
+            bs.setB15(top50Pc.subList(35,Math.min(size, 50)));
+        }else{
+            bs.setRating_b15(0);
+            bs.setScores_b15(new ArrayList<>());
+        }
         return BeanConvent.toBestPlayCountInfo(bs, fishUserInfo);
     }
 }
