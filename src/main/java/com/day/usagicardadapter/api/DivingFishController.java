@@ -86,10 +86,13 @@ public class DivingFishController {
         int mid = Integer.parseInt(musicId);
         UsagiCardSong song = ucHelper.queryUserSingleSongScore(uuidMappingUtil.get(qq).getUuid(),musicId);
         Map<String, List<FishRecord>> map = new HashMap<>();
+        if (song == null) {
+            //返回空数据
+            return map;
+        }
         //区分是不是dx
         boolean isDx = mid > 10000;
         List<FishRecord> list = song.getScores().stream().map(BeanConvent::toRecord).toList();
-
         map.put(musicId,list.stream().filter(r->{
             if(isDx) return Objects.equals(r.getType(), "DX");
             else return Objects.equals(r.getType(), "SD");

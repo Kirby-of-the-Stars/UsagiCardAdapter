@@ -47,9 +47,11 @@ public class StrUtil {
             case 6 -> "aaa";
             case 7 -> "aa";
             case 8 -> "a";
-            case 9 -> "b";
-            case 10 -> "c";
-            case 11 -> "d";
+            case 9 -> "bbb";
+            case 10 -> "bb";
+            case 11 -> "b";
+            case 12 -> "c";
+            case 13 -> "d";
             case null, default -> "";
         };
     }
@@ -77,14 +79,17 @@ public class StrUtil {
             case "maimai でらっくす UNiVERSE PLUS" -> "星";
             case "maimai でらっくす FESTiVAL" -> "祭";
             case "maimai でらっくす FESTiVAL PLUS" -> "祝";
+            case "maimai でらっくす BUDDIES" -> "双";
+            case "maimai でらっくす BUDDIES PLUS" -> "宴";
+            case "maimai でらっくす PRISM" -> "镜";
+            case "maimai でらっくす PRISM PLUS" -> "彩";
             case null, default -> "";
         };
     }
     public static String conventDXType(String type){
       return switch (type){
             case "standard" -> "SD";
-            case "dx" ->"DX";
-            case "utage" -> "UTAGE";
+            case "dx","utage" ->"DX"; //fish alway show DX in utage
             case null, default -> "";
         };
     }

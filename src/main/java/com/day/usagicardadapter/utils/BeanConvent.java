@@ -136,17 +136,19 @@ public class BeanConvent {
     public static FishRecord toRecord(ScoreInfo score) {
         FishRecord record = new FishRecord();
         record.setAchievements(score.getAchievements());
-        record.setDs(score.getLevel_value());
+        record.setDs(score.getLevel_value());//TODO fish has level_value in utage
         record.setDxScore(score.getDx_score());
         record.setLevel(score.getLevel());
         record.setFc(StrUtil.conventIntFc(score.getFc()));
         record.setFs(StrUtil.conventIntFs(score.getFs()));
-        record.setLevel_label(StrUtil.conventLevelStr(score.getLevel_index()));
+        String label = StrUtil.conventLevelStr(score.getLevel_index());
+        if(score.getType().equals("utage")) label = "Utage";
+        record.setLevel_label(label);
         record.setLevel_index(score.getLevel_index());
         record.setRa(score.getDx_rating());
         record.setRate(StrUtil.conventIntRate(score.getRate()));
         record.setSong_id(toFishStyleId(score.getId(),score.getType()));
-        record.setTitle(score.getTitle());
+        record.setTitle(score.getTitle());//TODO fish has kanji in title
         record.setType(StrUtil.conventDXType(score.getType()));
         return record;
     }
@@ -180,7 +182,7 @@ public class BeanConvent {
     public static Integer toFishStyleId(Integer lxnsStyleId,String type){
         return switch (type){
             case "dx", "DX" -> lxnsStyleId + 10000;
-            case "SD","standard"  -> lxnsStyleId;
+            case "SD", "standard", "Utage", "utage" -> lxnsStyleId;
             default -> throw new IllegalStateException("Unexpected value: " + type);
         };
     }

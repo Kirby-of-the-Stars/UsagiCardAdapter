@@ -62,6 +62,10 @@ public class UsagiCardHelper {
                     .data("id",songId)
                     .get();
             if (body == null || body.isEmpty()) throw new UsagiCardException("empty result");
+            if ("null".equals(body)) {
+                //map is not found
+                return null;
+            }
             UsagiCardSong obj = ONode.loadStr(body).toObject(UsagiCardSong.class);
             if(obj.getSong()==null || obj.getSong().getId() == null) throw new UsagiCardException("unexpected result:"+body);
             return obj;
