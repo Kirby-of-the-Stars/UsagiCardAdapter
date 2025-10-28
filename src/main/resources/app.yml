@@ -15,7 +15,8 @@ solon.logging:
     console:
       level: INFO
     file:
-      level: INFO
+      level: DEBUG
+    maxHistory: 2
 app:
   usagi:
     fish:

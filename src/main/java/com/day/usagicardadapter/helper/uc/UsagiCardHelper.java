@@ -55,8 +55,9 @@ public class UsagiCardHelper {
     }
 
     public UsagiCardSong queryUserSingleSongScore(String UUID, String songId){
+        String body = null;
         try {
-            String body = HttpUtils.http(API_HOST + "/v1/maimai/minfo")
+             body = HttpUtils.http(API_HOST + "/v1/maimai/minfo")
                     .headers(defaultHeaders)
                     .data("uuid", UUID)
                     .data("id",songId)
@@ -69,7 +70,8 @@ public class UsagiCardHelper {
             UsagiCardSong obj = ONode.loadStr(body).toObject(UsagiCardSong.class);
             if(obj.getSong()==null || obj.getSong().getId() == null) throw new UsagiCardException("unexpected result:"+body);
             return obj;
-        } catch (HttpException e) {
+        } catch (HttpException | ClassCastException e) {
+            log.error("request exception body :{}",body);
             throw new UsagiCardException("request exception", e);
         }
     }
